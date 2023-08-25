@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	zap_logger "github.com/romandnk/dynamic-user-segmentation-service/internal/logger/zap"
+	"github.com/romandnk/dynamic-user-segmentation-service/internal/server/http_server"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/storage/postgres"
 	"github.com/spf13/viper"
 	"go.uber.org/zap/zapcore"
@@ -28,11 +29,18 @@ var (
 	ErrPostgresInvalidMinConns        = errors.New("min conns cannot be less than zero")
 	ErrPostgresInvalidMaxConnLifetime = errors.New("max conn lifetime cannot be less than zero")
 	ErrPostgresInvalidMaxConnIdleTime = errors.New("max conn idle time cannot be less than zero")
+	ErrServerParseReadTimeout         = errors.New("invalid read timeout (format 1h2m3s)")
+	ErrServerParseWriteTimeout        = errors.New("invalid write timeout (format 1h2m3s)")
+	ErrServerEmptyHost                = errors.New("empty host")
+	ErrServerInvalidPort              = errors.New("invalid port (from 0 to 65535 inclusively)")
+	ErrServerInvalidReadTimeout       = errors.New("invalid read timeout (must be only positive)")
+	ErrServerInvalidWriteTimeout      = errors.New("invalid write timeout (must be only positive)")
 )
 
 type Config struct {
 	ZapLogger zap_logger.Config
 	Postgres  postgres.Config
+	Server    http_server.Config
 }
 
 func NewConfig(configPath string) (*Config, error) {
@@ -56,9 +64,15 @@ func NewConfig(configPath string) (*Config, error) {
 		return nil, fmt.Errorf("postgres: %w", err)
 	}
 
+	serverConfig, err := newServerConfig()
+	if err != nil {
+		return nil, fmt.Errorf("server: %w", err)
+	}
+
 	config := &Config{
 		ZapLogger: zapLoggerConfig,
 		Postgres:  postgresConfig,
+		Server:    serverConfig,
 	}
 
 	return config, nil
@@ -209,6 +223,53 @@ func validatePostgresConfig(cfg postgres.Config) error {
 	}
 	if cfg.MaxConnIdleTime <= 0 {
 		return fmt.Errorf("max conn idle time: %w", ErrPostgresInvalidMaxConnIdleTime)
+	}
+
+	return nil
+}
+
+func newServerConfig() (http_server.Config, error) {
+	host := viper.GetString("server.host")
+	port := viper.GetInt("server.port")
+	readTimeout := viper.GetString("server.read_timeout")
+	parsedReadTimeout, err := time.ParseDuration(readTimeout)
+	if err != nil {
+		return http_server.Config{}, fmt.Errorf("read timeout: %w", ErrServerParseReadTimeout)
+	}
+
+	writeTimeout := viper.GetString("server.write_timeout")
+	parsedWriteTimeout, err := time.ParseDuration(writeTimeout)
+	if err != nil {
+		return http_server.Config{}, fmt.Errorf("write timeout: %w", ErrServerParseWriteTimeout)
+	}
+
+	cfg := http_server.Config{
+		Host:         host,
+		Port:         port,
+		ReadTimeout:  parsedReadTimeout,
+		WriteTimeout: parsedWriteTimeout,
+	}
+
+	err = validateServerConfig(cfg)
+	if err != nil {
+		return http_server.Config{}, err
+	}
+
+	return cfg, nil
+}
+
+func validateServerConfig(cfg http_server.Config) error {
+	if cfg.Host == "" {
+		return fmt.Errorf("host: %w", ErrServerEmptyHost)
+	}
+	if cfg.Port < 0 || cfg.Port > 65535 {
+		return fmt.Errorf("port: %w", ErrServerInvalidPort)
+	}
+	if cfg.ReadTimeout <= 0 {
+		return fmt.Errorf("read timeout: %w", ErrServerInvalidReadTimeout)
+	}
+	if cfg.WriteTimeout <= 0 {
+		return fmt.Errorf("write timeout: %w", ErrServerInvalidWriteTimeout)
 	}
 
 	return nil

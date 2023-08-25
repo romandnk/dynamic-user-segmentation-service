@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	segmentsTable     = "segments"
-	userSegmentsTable = "user_segments"
+	segmentsTable = "segments"
+	usersTable    = "users"
 )
 
 type PgxIface interface {
