@@ -1,0 +1,54 @@
+version: "3.9"
+name: "dynamic-user-segmentation"
+
+services:
+  postgres:
+    image: postgres:15
+    user: "postgres"
+    restart: always
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: "dynamic-user-segmentation"
+    ports:
+      - "5432:5432"
+    networks:
+      dynamic-user-segmentation:
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready", "-U", "postgres", "-d", "dynamic-user-segmentation" ]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  migration:
+    build:
+      context: ../.
+      dockerfile: ./deployments/migration/Dockerfile
+    environment:
+      DATABASE_URL: "postgres://postgres:1234@postgres:5432/dynamic-user-segmentation?sslmode=disable"
+    networks:
+      dynamic-user-segmentation:
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  service:
+    build:
+      context: ../.
+      dockerfile: ./deployments/dynamic-user-segmentation/Dockerfile
+    env_file:
+      - ../configs/dynamic-user-segmentation.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migration:
+        condition: service_started
+    networks:
+      dynamic-user-segmentation:
+    ports:
+      - '8080:8080'
+
+networks:
+  dynamic-user-segmentation:
+
+volumes:
+  pgdata:
