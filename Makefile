@@ -1,5 +1,8 @@
-make run:
+run:
 	docker compose -f ./deployments/docker-compose.yaml up -d --build
 
-make stop:
+stop:
 	docker compose -f ./deployments/docker-compose.yaml down
+
+clear:
+	docker volume rm dynamic-user-segmentation_pgdata

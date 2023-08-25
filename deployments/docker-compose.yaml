@@ -9,13 +9,13 @@ services:
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: 1234
-      POSTGRES_DB: "dynamic-user-segmentation"
+      POSTGRES_DB: "dynamic-user-segmentation_db"
     ports:
       - "5432:5432"
     networks:
       dynamic-user-segmentation:
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready", "-U", "postgres", "-d", "dynamic-user-segmentation" ]
+      test: [ "CMD-SHELL", "pg_isready", "-U", "postgres", "-d", "dynamic-user-segmentation_db" ]
     volumes:
       - pgdata:/var/lib/postgresql/data
 

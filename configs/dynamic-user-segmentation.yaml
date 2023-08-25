@@ -1,23 +1,15 @@
-server:
-  host: "advertisement"
-  port: "8080"
-  read_timeout: "10s"
-  write_timeout: "10s"
-
 zap_logger:
-  level: "INFO"
+  level: "info"
   encoding: "json"
   output_path: ["stdout"]
-  error_output_path: ["stderr"]
+  error_output_path: ["stdout"]
 
-postgres:
+postgres_storage:
   host: "postgres"
   port: "5432"
-  db_name: "adverts_db"
+  db_name: "dynamic-user-segmentation_db"
   sslmode: "disable"
   max_conns: 5
   min_conns: 3
   max_conn_lifetime: "1h"
   max_conn_idle_time: "1m"
-
-path_to_images: "static/images/"
