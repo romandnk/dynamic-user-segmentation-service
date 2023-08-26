@@ -1,5 +1,7 @@
 package service
 
+//go:generate mockgen -source=service.go -destination=mock/mock.go service
+
 import (
 	"context"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/storage"
@@ -19,6 +21,6 @@ type Service struct {
 
 func NewService(storage storage.Storage) *Service {
 	return &Service{
-		NewSegmentService(storage),
+		newSegmentService(storage),
 	}
 }

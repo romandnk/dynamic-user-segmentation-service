@@ -6,3 +6,9 @@ stop:
 
 clear:
 	docker volume rm dynamic-user-segmentation_pgdata
+
+test:
+	go test -race ./internal/...
+
+test-coverage:
+	go test -cover ./internal/...

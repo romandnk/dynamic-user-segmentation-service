@@ -14,20 +14,21 @@ var (
 	ErrEmptySlug                 = errors.New("empty slug")
 	ErrInvalidSlugRepresentation = errors.New("slug can only contain uppercase letters")
 	ErrInvalidPercentageZero     = errors.New("percentage cannot be zero")
-	ErrInvalidPercentageFormat   = errors.New("invalid slug format (e.g. 100%, 99%, 1%)")
+	ErrInvalidPercentageFormat   = errors.New("invalid percentage format (e.g. 100%, 99%, 1%)")
+	ErrInvalidPercentageTooBig   = errors.New("percentage cannot be more than 100")
 )
 
-var percentageValidFormat = regexp.MustCompile(`^(100|\d{1,2})%$`)
+var percentageValidFormat = regexp.MustCompile(`^\d+%$`)
 
-type SegmentService struct {
+type segmentService struct {
 	segment storage.SegmentStorage
 }
 
-func NewSegmentService(segment storage.SegmentStorage) *SegmentService {
-	return &SegmentService{segment: segment}
+func newSegmentService(segment storage.SegmentStorage) *segmentService {
+	return &segmentService{segment: segment}
 }
 
-func (s *SegmentService) CreateSegment(ctx context.Context, slug string, percentageStr string) error {
+func (s *segmentService) CreateSegment(ctx context.Context, slug string, percentageStr string) error {
 	slug = strings.TrimSpace(slug)
 	percentageStr = strings.TrimSpace(percentageStr)
 
@@ -65,11 +66,18 @@ func validatePercentage(percentageStr string) (uint8, error) {
 		}
 	}
 
-	percentage, err := strconv.ParseUint(percentageStr[:len(percentageStr)-1], 10, 8)
+	percentage, err := strconv.ParseInt(percentageStr[:len(percentageStr)-1], 10, 64)
 	if err != nil {
 		return 0, custom_error.CustomError{
 			Field:   "percentage",
 			Message: err.Error(),
+		}
+	}
+
+	if percentage > 100 {
+		return 0, custom_error.CustomError{
+			Field:   "percentage",
+			Message: ErrInvalidPercentageTooBig.Error(),
 		}
 	}
 
