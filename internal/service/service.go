@@ -9,6 +9,7 @@ import (
 
 type Segment interface {
 	CreateSegment(ctx context.Context, slug string, percentageStr string) error
+	DeleteSegment(ctx context.Context, slug string) error
 }
 
 type Services interface {

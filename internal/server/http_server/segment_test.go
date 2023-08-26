@@ -59,15 +59,14 @@ func TestHandler_CreateSegment(t *testing.T) {
 func TestHandler_CreateSegmentErrorParsingJsonBody(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	services := mock_service.NewMockServices(ctrl)
 	logger := mock_logger.NewMockLogger(ctrl)
 
 	expectedMessage := "error parsing json body"
-	expectedError := "json: cannot unmarshal bool into Go struct field segmentBodyRequest.slug of type string"
+	expectedError := "json: cannot unmarshal bool into Go struct field createSegmentBodyRequest.slug of type string"
 
 	logger.EXPECT().Error(ErrParsingBody.Error(), zap.String("errors", expectedError))
 
-	handler := NewHandler(services, logger)
+	handler := NewHandler(nil, logger)
 
 	r := gin.Default()
 	r.POST(url+"/segments", handler.CreateSegment)

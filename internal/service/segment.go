@@ -90,3 +90,23 @@ func validatePercentage(percentageStr string) (uint8, error) {
 
 	return uint8(percentage), nil
 }
+
+func (s *segmentService) DeleteSegment(ctx context.Context, slug string) error {
+	slug = strings.TrimSpace(slug)
+
+	if slug == "" {
+		return custom_error.CustomError{
+			Field:   "slug",
+			Message: ErrEmptySlug.Error(),
+		}
+	}
+
+	if strings.ToUpper(slug) != slug {
+		return custom_error.CustomError{
+			Field:   "slug",
+			Message: ErrInvalidSlugRepresentation.Error(),
+		}
+	}
+
+	return s.segment.DeleteSegment(ctx, slug)
+}

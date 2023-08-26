@@ -32,7 +32,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			segments := version.Group("/segments")
 			{
 				segments.POST("/", h.CreateSegment)
-				//segments.DELETE("/", h.DeleteSegment)
+				segments.DELETE("/", h.DeleteSegment)
 			}
 		}
 	}

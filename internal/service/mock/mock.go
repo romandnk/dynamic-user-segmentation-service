@@ -48,6 +48,20 @@ func (mr *MockSegmentMockRecorder) CreateSegment(ctx, slug, percentageStr interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSegment", reflect.TypeOf((*MockSegment)(nil).CreateSegment), ctx, slug, percentageStr)
 }
 
+// DeleteSegment mocks base method.
+func (m *MockSegment) DeleteSegment(ctx context.Context, slug string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteSegment", ctx, slug)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteSegment indicates an expected call of DeleteSegment.
+func (mr *MockSegmentMockRecorder) DeleteSegment(ctx, slug interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSegment", reflect.TypeOf((*MockSegment)(nil).DeleteSegment), ctx, slug)
+}
+
 // MockServices is a mock of Services interface.
 type MockServices struct {
 	ctrl     *gomock.Controller
@@ -83,4 +97,18 @@ func (m *MockServices) CreateSegment(ctx context.Context, slug, percentageStr st
 func (mr *MockServicesMockRecorder) CreateSegment(ctx, slug, percentageStr interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSegment", reflect.TypeOf((*MockServices)(nil).CreateSegment), ctx, slug, percentageStr)
+}
+
+// DeleteSegment mocks base method.
+func (m *MockServices) DeleteSegment(ctx context.Context, slug string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteSegment", ctx, slug)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteSegment indicates an expected call of DeleteSegment.
+func (mr *MockServicesMockRecorder) DeleteSegment(ctx, slug interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSegment", reflect.TypeOf((*MockServices)(nil).DeleteSegment), ctx, slug)
 }

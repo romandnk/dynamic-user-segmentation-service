@@ -78,3 +78,25 @@ func (s *Storage) CreateSegment(ctx context.Context, slug string, percentage uin
 		Message: slug + " already exists",
 	}
 }
+
+func (s *Storage) DeleteSegment(ctx context.Context, slug string) error {
+	query := fmt.Sprintf(`
+		UPDATE %s 
+		SET deleted = true
+		WHERE slug = $1 AND deleted = false
+	`, segmentsTable)
+
+	ct, err := s.db.Exec(ctx, query, slug)
+	if err != nil {
+		return err
+	}
+
+	if ct.RowsAffected() == 0 {
+		return custom_error.CustomError{
+			Field:   "slug",
+			Message: slug + " doesn't exist",
+		}
+	}
+
+	return nil
+}
