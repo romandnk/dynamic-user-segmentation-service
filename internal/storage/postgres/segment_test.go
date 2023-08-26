@@ -123,3 +123,61 @@ func TestStorage_CreateSegmentExistedAndNotDeleted(t *testing.T) {
 
 	require.NoError(t, mock.ExpectationsWereMet(), "there was unexpected result")
 }
+
+func TestStorage_DeleteSegment(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	require.NoError(t, err)
+	defer mock.Close()
+
+	ctx := context.Background()
+
+	expectedSlug := "AVITO_TEST"
+
+	query := fmt.Sprintf(`
+		UPDATE %s 
+		SET deleted = true
+		WHERE slug = $1 AND deleted = false
+	`, segmentsTable)
+
+	mock.ExpectExec(regexp.QuoteMeta(query)).WithArgs(expectedSlug).
+		WillReturnResult(pgxmock.NewResult("update", 1))
+
+	storage := NewStoragePostgres()
+	storage.db = mock
+
+	err = storage.DeleteSegment(ctx, expectedSlug)
+	require.NoError(t, err)
+
+	require.NoError(t, mock.ExpectationsWereMet(), "there was unexpected result")
+}
+
+func TestStorage_DeleteSegmentNotExist(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	require.NoError(t, err)
+	defer mock.Close()
+
+	ctx := context.Background()
+
+	expectedSlug := "AVITO_TEST"
+	expectedError := custom_error.CustomError{
+		Field:   "slug",
+		Message: expectedSlug + " doesn't exist",
+	}
+
+	query := fmt.Sprintf(`
+		UPDATE %s 
+		SET deleted = true
+		WHERE slug = $1 AND deleted = false
+	`, segmentsTable)
+
+	mock.ExpectExec(regexp.QuoteMeta(query)).WithArgs(expectedSlug).
+		WillReturnResult(pgxmock.NewResult("update", 0))
+
+	storage := NewStoragePostgres()
+	storage.db = mock
+
+	err = storage.DeleteSegment(ctx, expectedSlug)
+	require.ErrorIs(t, err, expectedError)
+
+	require.NoError(t, mock.ExpectationsWereMet(), "there was unexpected result")
+}
