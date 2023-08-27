@@ -10,18 +10,22 @@ import (
 )
 
 const (
-	segmentsTable = "segments"
-	usersTable    = "users"
+	segmentsTable     = "segments"
+	userSegmentsTable = "user_segments"
+	operationsTable   = "operations"
 )
 
-type PgxIface interface {
+type PgxPool interface {
 	Close()
-	Exec(ctx context.Context, sql string, arguments ...interface{}) (pgconn.CommandTag, error)
-	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
-	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
+	Acquire(ctx context.Context) (*pgxpool.Conn, error)
+	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
+	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
 	SendBatch(ctx context.Context, b *pgx.Batch) pgx.BatchResults
 	Begin(ctx context.Context) (pgx.Tx, error)
 	BeginTx(ctx context.Context, txOptions pgx.TxOptions) (pgx.Tx, error)
+	CopyFrom(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error)
+	Ping(ctx context.Context) error
 }
 
 type Config struct {
@@ -38,7 +42,7 @@ type Config struct {
 }
 
 type Storage struct {
-	db PgxIface
+	db PgxPool
 }
 
 func NewStoragePostgres() *Storage {
@@ -81,8 +85,7 @@ func (s *Storage) Connect(ctx context.Context, cfg Config) error {
 }
 
 func (s *Storage) Close() {
-	if s.db == nil {
-		return
+	if s.db != nil {
+		s.db.Close()
 	}
-	s.db.Close()
 }

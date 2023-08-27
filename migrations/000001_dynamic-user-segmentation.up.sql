@@ -1,17 +1,22 @@
 CREATE TABLE segments (
-    slug VARCHAR(255) PRIMARY KEY ,
-    auto_add_percentage SMALLINT NOT NULL,
-    deleted BOOLEAN DEFAULT FALSE
+    slug VARCHAR(255) PRIMARY KEY,
+    auto_add_percentage SMALLINT NOT NULL
 );
 
-CREATE INDEX idx_segments_slug ON segments (slug);
+CREATE TABLE user_segments (
+    user_id INTEGER NOT NULL,
+    segment_slug VARCHAR(255),
+    auto_add BOOLEAN NOT NULL,
+    FOREIGN KEY (segment_slug) REFERENCES segments (slug) ON DELETE NO ACTION
+);
 
-CREATE TABLE users (
-    id INTEGER PRIMARY KEY,
-    segment_slug VARCHAR(255) NOT NULL REFERENCES segments (slug),
+CREATE INDEX idx_user_segments_user_id ON user_segments (user_id);
+
+CREATE TABLE operations (
+    user_id INTEGER NOT NULL,
+    segment_slug VARCHAR(255) NOT NULL,
     date TIMESTAMPTZ NOT NULL,
-    operation VARCHAR(6) NOT NULL,
-    deleted BOOLEAN DEFAULT FALSE
+    operation VARCHAR(6) NOT NULL
 );
 
-CREATE INDEX idx_user_segments_segment_slug ON users (segment_slug);
+CREATE INDEX idx_operations_user_id ON operations (user_id);

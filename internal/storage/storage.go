@@ -7,6 +7,11 @@ type SegmentStorage interface {
 	DeleteSegment(ctx context.Context, slug string) error
 }
 
+type UserStorage interface {
+	UpdateUserSegments(ctx context.Context, segmentsToAdd, segmentsToDelete []string, id int) error
+}
+
 type Storage interface {
 	SegmentStorage
+	UserStorage
 }

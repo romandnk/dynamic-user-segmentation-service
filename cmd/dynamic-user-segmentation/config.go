@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	zap_logger "github.com/romandnk/dynamic-user-segmentation-service/internal/logger/zap"
-	"github.com/romandnk/dynamic-user-segmentation-service/internal/server/http_server"
+	http_server "github.com/romandnk/dynamic-user-segmentation-service/internal/server/http"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/storage/postgres"
 	"github.com/spf13/viper"
 	"go.uber.org/zap/zapcore"

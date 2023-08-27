@@ -3,7 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/pashagolub/pgxmock/v2"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/custom_error"
 	"github.com/stretchr/testify/require"
@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func TestStorage_CreateSegmentNotExist(t *testing.T) {
+func TestStorage_CreateSegment(t *testing.T) {
 	mock, err := pgxmock.NewPool()
 	require.NoError(t, err)
 	defer mock.Close()
@@ -21,22 +21,13 @@ func TestStorage_CreateSegmentNotExist(t *testing.T) {
 	expectedSlug := "AVITO_TEST"
 	expectedPercentage := uint8(10)
 
-	querySelect := fmt.Sprintf(`
-			SELECT deleted
-			FROM %s
-			WHERE slug = $1
+	query := fmt.Sprintf(`
+		INSERT INTO %s (slug, auto_add_percentage) 
+		VALUES ($1, $2)
 	`, segmentsTable)
 
-	queryInsert := fmt.Sprintf(`
-			INSERT INTO %s (slug, auto_add_percentage)
-			VALUES ($1, $2)
-	`, segmentsTable)
-
-	mock.ExpectBegin()
-	mock.ExpectQuery(regexp.QuoteMeta(querySelect)).WithArgs(expectedSlug).WillReturnError(pgx.ErrNoRows)
-	mock.ExpectExec(regexp.QuoteMeta(queryInsert)).WithArgs(expectedSlug, expectedPercentage).
+	mock.ExpectExec(regexp.QuoteMeta(query)).WithArgs(expectedSlug, expectedPercentage).
 		WillReturnResult(pgxmock.NewResult("insert", 1))
-	mock.ExpectCommit()
 
 	storage := NewStoragePostgres()
 	storage.db = mock
@@ -47,48 +38,7 @@ func TestStorage_CreateSegmentNotExist(t *testing.T) {
 	require.NoError(t, mock.ExpectationsWereMet(), "there was unexpected result")
 }
 
-func TestStorage_CreateSegmentExistedAndDeleted(t *testing.T) {
-	mock, err := pgxmock.NewPool()
-	require.NoError(t, err)
-	defer mock.Close()
-
-	ctx := context.Background()
-
-	expectedSlug := "AVITO_TEST"
-	expectedPercentage := uint8(10)
-
-	querySelect := fmt.Sprintf(`
-			SELECT deleted
-			FROM %s
-			WHERE slug = $1
-	`, segmentsTable)
-
-	queryUpdate := fmt.Sprintf(`
-			UPDATE %s 
-			SET deleted = false, 
-				auto_add_percentage = $1
-			WHERE slug = $2
-	`, segmentsTable)
-
-	expectedRow := pgxmock.NewRows([]string{"deleted"}).AddRow(true)
-
-	mock.ExpectBegin()
-	mock.ExpectQuery(regexp.QuoteMeta(querySelect)).WithArgs(expectedSlug).
-		WillReturnRows(expectedRow)
-	mock.ExpectExec(regexp.QuoteMeta(queryUpdate)).WithArgs(expectedPercentage, expectedSlug).
-		WillReturnResult(pgxmock.NewResult("update", 1))
-	mock.ExpectCommit()
-
-	storage := NewStoragePostgres()
-	storage.db = mock
-
-	err = storage.CreateSegment(ctx, expectedSlug, expectedPercentage)
-	require.NoError(t, err)
-
-	require.NoError(t, mock.ExpectationsWereMet(), "there was unexpected result")
-}
-
-func TestStorage_CreateSegmentExistedAndNotDeleted(t *testing.T) {
+func TestStorage_CreateSegmentExists(t *testing.T) {
 	mock, err := pgxmock.NewPool()
 	require.NoError(t, err)
 	defer mock.Close()
@@ -102,18 +52,18 @@ func TestStorage_CreateSegmentExistedAndNotDeleted(t *testing.T) {
 		Message: expectedSlug + " already exists",
 	}
 
-	querySelect := fmt.Sprintf(`
-			SELECT deleted
-			FROM %s
-			WHERE slug = $1
+	query := fmt.Sprintf(`
+		INSERT INTO %s (slug, auto_add_percentage)
+		VALUES ($1, $2)
 	`, segmentsTable)
 
-	expectedRow := pgxmock.NewRows([]string{"deleted"}).AddRow(false)
+	returnError := &pgconn.PgError{
+		Code:           "23505",
+		Message:        "duplicate key value violates unique constraint \"segments_slug_key\"",
+		ConstraintName: "segments_slug_key",
+	}
 
-	mock.ExpectBegin()
-	mock.ExpectQuery(regexp.QuoteMeta(querySelect)).WithArgs(expectedSlug).
-		WillReturnRows(expectedRow)
-	mock.ExpectCommit()
+	mock.ExpectExec(regexp.QuoteMeta(query)).WithArgs(expectedSlug, expectedPercentage).WillReturnError(returnError)
 
 	storage := NewStoragePostgres()
 	storage.db = mock
@@ -124,7 +74,7 @@ func TestStorage_CreateSegmentExistedAndNotDeleted(t *testing.T) {
 	require.NoError(t, mock.ExpectationsWereMet(), "there was unexpected result")
 }
 
-func TestStorage_DeleteSegment(t *testing.T) {
+func TestStorage_DeleteSegmentOnlyInSegmentsTable(t *testing.T) {
 	mock, err := pgxmock.NewPool()
 	require.NoError(t, err)
 	defer mock.Close()
@@ -133,14 +83,67 @@ func TestStorage_DeleteSegment(t *testing.T) {
 
 	expectedSlug := "AVITO_TEST"
 
-	query := fmt.Sprintf(`
-		UPDATE %s 
-		SET deleted = true
-		WHERE slug = $1 AND deleted = false
+	queryDeleteFromUserSegments := fmt.Sprintf(`
+		DELETE FROM %s
+		WHERE segment_slug = $1
+		RETURNING user_id
+	`, userSegmentsTable)
+
+	queryDeleteFromSegments := fmt.Sprintf(`
+		DELETE FROM %s
+		WHERE slug = $1
 	`, segmentsTable)
 
-	mock.ExpectExec(regexp.QuoteMeta(query)).WithArgs(expectedSlug).
-		WillReturnResult(pgxmock.NewResult("update", 1))
+	mock.ExpectBegin()
+	mock.ExpectQuery(regexp.QuoteMeta(queryDeleteFromUserSegments)).WithArgs(expectedSlug).
+		WillReturnRows(pgxmock.NewRows([]string{}))
+	mock.ExpectExec(regexp.QuoteMeta(queryDeleteFromSegments)).WithArgs(expectedSlug).
+		WillReturnResult(pgxmock.NewResult("delete", 1))
+	mock.ExpectCommit()
+
+	storage := NewStoragePostgres()
+	storage.db = mock
+
+	err = storage.DeleteSegment(ctx, expectedSlug)
+	require.NoError(t, err)
+
+	require.NoError(t, mock.ExpectationsWereMet(), "there was unexpected result")
+}
+
+func TestStorage_DeleteSegmentInSegmentsTableAndUserSegmentsTable(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	require.NoError(t, err)
+	defer mock.Close()
+
+	ctx := context.Background()
+
+	expectedSlug := "AVITO_TEST"
+
+	queryDeleteFromUserSegments := fmt.Sprintf(`
+		DELETE FROM %s
+		WHERE segment_slug = $1
+		RETURNING user_id
+	`, userSegmentsTable)
+
+	queryDeleteFromSegments := fmt.Sprintf(`
+		DELETE FROM %s
+		WHERE slug = $1
+	`, segmentsTable)
+
+	queryAddOperations := fmt.Sprintf(`
+		INSERT INTO %s (user_id, segment_slug, date, operation, auto_add) 
+		VALUES ($1, $2, $3, $4, $5)
+	`, operationsTable)
+
+	mock.ExpectBegin()
+	mock.ExpectQuery(regexp.QuoteMeta(queryDeleteFromUserSegments)).WithArgs(expectedSlug).
+		WillReturnRows(pgxmock.NewRows([]string{"user_id"}).AddRow(1))
+	mock.ExpectExec(regexp.QuoteMeta(queryDeleteFromSegments)).WithArgs(expectedSlug).
+		WillReturnResult(pgxmock.NewResult("delete", 1))
+	mock.ExpectExec(regexp.QuoteMeta(queryAddOperations)).
+		WithArgs(1, expectedSlug, pgxmock.AnyArg(), "delete", false).
+		WillReturnResult(pgxmock.NewResult("insert", 1))
+	mock.ExpectCommit()
 
 	storage := NewStoragePostgres()
 	storage.db = mock
@@ -164,14 +167,23 @@ func TestStorage_DeleteSegmentNotExist(t *testing.T) {
 		Message: expectedSlug + " doesn't exist",
 	}
 
-	query := fmt.Sprintf(`
-		UPDATE %s 
-		SET deleted = true
-		WHERE slug = $1 AND deleted = false
+	queryDeleteFromUserSegments := fmt.Sprintf(`
+		DELETE FROM %s
+		WHERE segment_slug = $1
+		RETURNING user_id
+	`, userSegmentsTable)
+
+	queryDeleteFromSegments := fmt.Sprintf(`
+		DELETE FROM %s
+		WHERE slug = $1
 	`, segmentsTable)
 
-	mock.ExpectExec(regexp.QuoteMeta(query)).WithArgs(expectedSlug).
-		WillReturnResult(pgxmock.NewResult("update", 0))
+	mock.ExpectBegin()
+	mock.ExpectQuery(regexp.QuoteMeta(queryDeleteFromUserSegments)).WithArgs(expectedSlug).
+		WillReturnRows(pgxmock.NewRows([]string{}))
+	mock.ExpectExec(regexp.QuoteMeta(queryDeleteFromSegments)).WithArgs(expectedSlug).
+		WillReturnResult(pgxmock.NewResult("delete", 0))
+	mock.ExpectRollback()
 
 	storage := NewStoragePostgres()
 	storage.db = mock

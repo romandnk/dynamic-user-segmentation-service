@@ -4,7 +4,8 @@ import (
 	"context"
 	"flag"
 	zap_logger "github.com/romandnk/dynamic-user-segmentation-service/internal/logger/zap"
-	"github.com/romandnk/dynamic-user-segmentation-service/internal/server/http_server"
+	http_server "github.com/romandnk/dynamic-user-segmentation-service/internal/server/http"
+	v1 "github.com/romandnk/dynamic-user-segmentation-service/internal/server/http/v1"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/service"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/storage/postgres"
 	"go.uber.org/zap"
@@ -53,7 +54,7 @@ func main() {
 	services := service.NewService(postgresStorage)
 
 	// initialize http handler
-	handler := http_server.NewHandler(services, logg)
+	handler := v1.NewHandler(services, logg)
 
 	// initialize http server
 	server := http_server.NewServer(config.Server, handler.InitRoutes())
