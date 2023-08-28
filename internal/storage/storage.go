@@ -8,7 +8,7 @@ type SegmentStorage interface {
 }
 
 type UserStorage interface {
-	UpdateUserSegments(ctx context.Context, segmentsToAdd, segmentsToDelete []string, id int) error
+	UpdateUserSegments(ctx context.Context, segmentsToAdd, segmentsToDelete []string, userID int, random uint8) error
 }
 
 type Storage interface {

@@ -51,6 +51,7 @@ func (s *Storage) DeleteSegment(ctx context.Context, slug string) error {
 	if err != nil {
 		return fmt.Errorf("SegmentRepo.DeleteSegment - tx.Query: %w", err)
 	}
+	defer rows.Close()
 
 	var userIDs []int
 	for rows.Next() {

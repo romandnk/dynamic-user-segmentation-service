@@ -12,16 +12,23 @@ type Segment interface {
 	DeleteSegment(ctx context.Context, slug string) error
 }
 
+type User interface {
+	UpdateUserSegments(ctx context.Context, segmentsToAdd, segmentsToDelete []string, userID int) error
+}
+
 type Services interface {
 	Segment
+	User
 }
 
 type Service struct {
 	Segment
+	User
 }
 
 func NewService(storage storage.Storage) *Service {
 	return &Service{
 		newSegmentService(storage),
+		newUserService(storage),
 	}
 }
