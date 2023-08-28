@@ -6,7 +6,6 @@ CREATE TABLE segments (
 CREATE TABLE user_segments (
     user_id INTEGER NOT NULL,
     segment_slug VARCHAR(255),
-    auto_add BOOLEAN NOT NULL,
     FOREIGN KEY (segment_slug) REFERENCES segments (slug) ON DELETE NO ACTION
 );
 
@@ -16,7 +15,8 @@ CREATE TABLE operations (
     user_id INTEGER NOT NULL,
     segment_slug VARCHAR(255) NOT NULL,
     date TIMESTAMPTZ NOT NULL,
-    operation VARCHAR(6) NOT NULL
+    operation VARCHAR(6) NOT NULL,
+    auto_add BOOLEAN NOT NULL
 );
 
 CREATE INDEX idx_operations_user_id ON operations (user_id);

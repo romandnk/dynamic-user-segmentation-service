@@ -14,6 +14,7 @@ type Segment interface {
 
 type User interface {
 	UpdateUserSegments(ctx context.Context, segmentsToAdd, segmentsToDelete []string, userID int) error
+	GetActiveSegments(ctx context.Context, userID int) ([]string, error)
 }
 
 type Services interface {

@@ -41,3 +41,41 @@ func (h *Handler) AddAndDeleteUserSegments(c *gin.Context) {
 
 	c.Status(http.StatusOK)
 }
+
+type getActiveUserSegmentsBodyRequest struct {
+	UserID int `json:"user_id"`
+}
+
+func (h *Handler) GetActiveUserSegments(c *gin.Context) {
+	var getActiveUserSegmentsBody getActiveUserSegmentsBodyRequest
+
+	if err := c.ShouldBindJSON(&getActiveUserSegmentsBody); err != nil {
+		resp := newResponse("", ErrParsingBody.Error(), err)
+		h.sentResponse(c, http.StatusBadRequest, resp)
+		return
+	}
+
+	segments, err := h.services.GetActiveSegments(c, getActiveUserSegmentsBody.UserID)
+	if err != nil {
+		message := "error getting user segments"
+		code := http.StatusInternalServerError
+		var customError custom_error.CustomError
+		if errors.As(err, &customError) {
+			code = http.StatusBadRequest
+		}
+		resp := newResponse("", message, err)
+		h.sentResponse(c, code, resp)
+		return
+	}
+
+	if len(segments) == 0 {
+		c.JSON(http.StatusOK, map[string]string{
+			"segments": "no segments",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"segments": segments,
+	})
+}

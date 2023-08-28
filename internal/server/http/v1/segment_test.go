@@ -56,7 +56,7 @@ func TestHandler_CreateSegment(t *testing.T) {
 	require.Equal(t, []byte(nil), w.Body.Bytes())
 }
 
-func TestHandler_CreateSegmentErrorParsingJsonBody(t *testing.T) {
+func TestHandler_CreateSegmentErrorParsingJSONBody(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	logger := mock_logger.NewMockLogger(ctrl)

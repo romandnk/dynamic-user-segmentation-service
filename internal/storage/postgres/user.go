@@ -50,8 +50,8 @@ func (s *Storage) UpdateUserSegments(ctx context.Context, segmentsToAdd, segment
 
 func addUserSegment(ctx context.Context, tx pgx.Tx, segment string, userID int, now time.Time) error {
 	queryInsertUserSegment := fmt.Sprintf(`
-		INSERT INTO %s (user_id, segment_slug, auto_add)
-		VALUES ($1, $2, false)
+		INSERT INTO %s (user_id, segment_slug)
+		VALUES ($1, $2)
 	`, userSegmentsTable)
 
 	_, err := tx.Exec(ctx, queryInsertUserSegment, userID, segment)
@@ -69,8 +69,8 @@ func addUserSegment(ctx context.Context, tx pgx.Tx, segment string, userID int, 
 	}
 
 	queryInsertOperation := fmt.Sprintf(`
-		INSERT INTO %s (user_id, segment_slug, date, operation)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO %s (user_id, segment_slug, date, operation, auto_add)
+		VALUES ($1, $2, $3, $4, false)
 	`, operationsTable)
 
 	_, err = tx.Exec(ctx, queryInsertOperation, userID, segment, now, "add")
@@ -100,8 +100,8 @@ func deleteUserSegment(ctx context.Context, tx pgx.Tx, segment string, userID in
 	}
 
 	queryInsertOperation := fmt.Sprintf(`
-		INSERT INTO %s (user_id, segment_slug, date, operation)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO %s (user_id, segment_slug, date, operation, auto_add)
+		VALUES ($1, $2, $3, $4, false)
 	`, operationsTable)
 
 	_, err = tx.Exec(ctx, queryInsertOperation, userID, segment, now, "delete")
@@ -131,13 +131,13 @@ func autoAddSegments(ctx context.Context, tx pgx.Tx, userID int, random uint8, n
 	defer rows.Close()
 
 	queryInsertUserSegment := fmt.Sprintf(`
-		INSERT INTO %s (user_id, segment_slug, auto_add)
-		VALUES ($1, $2, true)
+		INSERT INTO %s (user_id, segment_slug)
+		VALUES ($1, $2)
 	`, userSegmentsTable)
 
 	queryInsertOperation := fmt.Sprintf(`
-		INSERT INTO %s (user_id, segment_slug, date, operation)
-		VALUES ($1, $2, $3, $4)
+		INSERT INTO %s (user_id, segment_slug, date, operation, auto_add)
+		VALUES ($1, $2, $3, $4, true)
 	`, operationsTable)
 
 	var slugs []string
@@ -165,4 +165,32 @@ func autoAddSegments(ctx context.Context, tx pgx.Tx, userID int, random uint8, n
 	}
 
 	return nil
+}
+
+func (s *Storage) GetActiveSegments(ctx context.Context, userID int) ([]string, error) {
+	query := fmt.Sprintf(`
+		SELECT segment_slug
+		FROM %s
+		WHERE user_id = $1
+	`, userSegmentsTable)
+
+	rows, err := s.db.Query(ctx, query, userID)
+	if err != nil {
+		return nil, fmt.Errorf("UserRepo.GetActiveSegments - s.db.Query: %w", err)
+	}
+	defer rows.Close()
+
+	var segments []string
+	for rows.Next() {
+		var segment string
+
+		err = rows.Scan(&segment)
+		if err != nil {
+			return nil, fmt.Errorf("UserRepo.GetActiveSegments - rows.Scan: %w", err)
+		}
+
+		segments = append(segments, segment)
+	}
+
+	return segments, nil
 }

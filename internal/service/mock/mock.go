@@ -62,6 +62,58 @@ func (mr *MockSegmentMockRecorder) DeleteSegment(ctx, slug interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSegment", reflect.TypeOf((*MockSegment)(nil).DeleteSegment), ctx, slug)
 }
 
+// MockUser is a mock of User interface.
+type MockUser struct {
+	ctrl     *gomock.Controller
+	recorder *MockUserMockRecorder
+}
+
+// MockUserMockRecorder is the mock recorder for MockUser.
+type MockUserMockRecorder struct {
+	mock *MockUser
+}
+
+// NewMockUser creates a new mock instance.
+func NewMockUser(ctrl *gomock.Controller) *MockUser {
+	mock := &MockUser{ctrl: ctrl}
+	mock.recorder = &MockUserMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockUser) EXPECT() *MockUserMockRecorder {
+	return m.recorder
+}
+
+// GetActiveSegments mocks base method.
+func (m *MockUser) GetActiveSegments(ctx context.Context, userID int) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetActiveSegments", ctx, userID)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetActiveSegments indicates an expected call of GetActiveSegments.
+func (mr *MockUserMockRecorder) GetActiveSegments(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActiveSegments", reflect.TypeOf((*MockUser)(nil).GetActiveSegments), ctx, userID)
+}
+
+// UpdateUserSegments mocks base method.
+func (m *MockUser) UpdateUserSegments(ctx context.Context, segmentsToAdd, segmentsToDelete []string, userID int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserSegments", ctx, segmentsToAdd, segmentsToDelete, userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateUserSegments indicates an expected call of UpdateUserSegments.
+func (mr *MockUserMockRecorder) UpdateUserSegments(ctx, segmentsToAdd, segmentsToDelete, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserSegments", reflect.TypeOf((*MockUser)(nil).UpdateUserSegments), ctx, segmentsToAdd, segmentsToDelete, userID)
+}
+
 // MockServices is a mock of Services interface.
 type MockServices struct {
 	ctrl     *gomock.Controller
@@ -111,4 +163,33 @@ func (m *MockServices) DeleteSegment(ctx context.Context, slug string) error {
 func (mr *MockServicesMockRecorder) DeleteSegment(ctx, slug interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSegment", reflect.TypeOf((*MockServices)(nil).DeleteSegment), ctx, slug)
+}
+
+// GetActiveSegments mocks base method.
+func (m *MockServices) GetActiveSegments(ctx context.Context, userID int) ([]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetActiveSegments", ctx, userID)
+	ret0, _ := ret[0].([]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetActiveSegments indicates an expected call of GetActiveSegments.
+func (mr *MockServicesMockRecorder) GetActiveSegments(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActiveSegments", reflect.TypeOf((*MockServices)(nil).GetActiveSegments), ctx, userID)
+}
+
+// UpdateUserSegments mocks base method.
+func (m *MockServices) UpdateUserSegments(ctx context.Context, segmentsToAdd, segmentsToDelete []string, userID int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserSegments", ctx, segmentsToAdd, segmentsToDelete, userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateUserSegments indicates an expected call of UpdateUserSegments.
+func (mr *MockServicesMockRecorder) UpdateUserSegments(ctx, segmentsToAdd, segmentsToDelete, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserSegments", reflect.TypeOf((*MockServices)(nil).UpdateUserSegments), ctx, segmentsToAdd, segmentsToDelete, userID)
 }
