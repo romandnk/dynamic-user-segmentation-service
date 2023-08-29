@@ -1,9 +1,12 @@
 package storage
 
-import "context"
+import (
+	"context"
+	"github.com/romandnk/dynamic-user-segmentation-service/internal/models"
+)
 
 type SegmentStorage interface {
-	CreateSegment(ctx context.Context, slug string, percentage uint8) error
+	CreateSegment(ctx context.Context, segment models.Segment) error
 	DeleteSegment(ctx context.Context, slug string) error
 }
 

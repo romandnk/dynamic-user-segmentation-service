@@ -6,23 +6,24 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/custom_error"
+	"github.com/romandnk/dynamic-user-segmentation-service/internal/models"
 	"time"
 )
 
-func (s *Storage) CreateSegment(ctx context.Context, slug string, percentage uint8) error {
+func (s *Storage) CreateSegment(ctx context.Context, segment models.Segment) error {
 	query := fmt.Sprintf(`
 		INSERT INTO %s (slug, auto_add_percentage) 
 		VALUES ($1, $2)
 	`, segmentsTable)
 
-	_, err := s.db.Exec(ctx, query, slug, percentage)
+	_, err := s.db.Exec(ctx, query, segment.Slug, segment.Percentage)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == "23505" {
 				return custom_error.CustomError{
 					Field:   "slug",
-					Message: slug + " already exists",
+					Message: segment.Slug + " already exists",
 				}
 			}
 		}

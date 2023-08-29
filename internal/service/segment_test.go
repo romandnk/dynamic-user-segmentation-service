@@ -10,7 +10,7 @@ func TestValidatePercentage(t *testing.T) {
 	testCases := []struct {
 		name           string
 		input          string
-		expectedOutput uint8
+		expectedOutput int
 		expectedError  error
 	}{
 		{

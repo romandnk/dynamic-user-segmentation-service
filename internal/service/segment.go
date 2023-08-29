@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/custom_error"
+	"github.com/romandnk/dynamic-user-segmentation-service/internal/models"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/storage"
 	"regexp"
 	"strconv"
@@ -51,10 +52,15 @@ func (s *segmentService) CreateSegment(ctx context.Context, slug string, percent
 		return err
 	}
 
-	return s.segment.CreateSegment(ctx, slug, percentage)
+	segment := models.Segment{
+		Slug:       slug,
+		Percentage: percentage,
+	}
+
+	return s.segment.CreateSegment(ctx, segment)
 }
 
-func validatePercentage(percentageStr string) (uint8, error) {
+func validatePercentage(percentageStr string) (int, error) {
 	if percentageStr == "" {
 		return 0, nil
 	}
@@ -88,7 +94,7 @@ func validatePercentage(percentageStr string) (uint8, error) {
 		}
 	}
 
-	return uint8(percentage), nil
+	return int(percentage), nil
 }
 
 func (s *segmentService) DeleteSegment(ctx context.Context, slug string) error {
