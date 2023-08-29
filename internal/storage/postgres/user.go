@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func (s *Storage) UpdateUserSegments(ctx context.Context, segmentsToAdd, segmentsToDelete []string, userID int, random uint8) error {
+func (s *Storage) UpdateUserSegments(ctx context.Context, segmentsToAdd, segmentsToDelete []string, userID int) error {
 	tx, err := s.db.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("UserRepo.UpdateUserSegments - s.db.Begin: %w", err)
@@ -33,11 +33,6 @@ func (s *Storage) UpdateUserSegments(ctx context.Context, segmentsToAdd, segment
 		if err != nil {
 			return err
 		}
-	}
-
-	err = autoAddSegments(ctx, tx, userID, random, now)
-	if err != nil {
-		return err
 	}
 
 	err = tx.Commit(ctx)
@@ -107,61 +102,6 @@ func deleteUserSegment(ctx context.Context, tx pgx.Tx, segment string, userID in
 	_, err = tx.Exec(ctx, queryInsertOperation, userID, segment, now, "delete")
 	if err != nil {
 		return fmt.Errorf("UserRepo.deleteUserSegment - tx.Exec: %w", err)
-	}
-
-	return nil
-}
-
-func autoAddSegments(ctx context.Context, tx pgx.Tx, userID int, random uint8, now time.Time) error {
-	querySelectSegments := fmt.Sprintf(`
-		SELECT slug
-		FROM %s
-		WHERE auto_add_percentage >= $1
-		AND slug NOT IN (
-    		SELECT segment_slug as slug                                                                                            
-    		FROM %s
-    		WHERE user_id = $2
-		)
-	`, segmentsTable, userSegmentsTable)
-
-	rows, err := tx.Query(ctx, querySelectSegments, random, userID)
-	if err != nil {
-		return fmt.Errorf("UserRepo.autoAddSegments - tx.Query: %w", err)
-	}
-	defer rows.Close()
-
-	queryInsertUserSegment := fmt.Sprintf(`
-		INSERT INTO %s (user_id, segment_slug)
-		VALUES ($1, $2)
-	`, userSegmentsTable)
-
-	queryInsertOperation := fmt.Sprintf(`
-		INSERT INTO %s (user_id, segment_slug, date, operation, auto_add)
-		VALUES ($1, $2, $3, $4, true)
-	`, operationsTable)
-
-	var slugs []string
-	for rows.Next() {
-		var slug string
-
-		err = rows.Scan(&slug)
-		if err != nil {
-			return fmt.Errorf("UserRepo.autoAddSegments - rows.Scan: %w", err)
-		}
-
-		slugs = append(slugs, slug)
-	}
-
-	for _, slug := range slugs {
-		_, err = tx.Exec(ctx, queryInsertUserSegment, userID, slug)
-		if err != nil {
-			return fmt.Errorf("UserRepo.autoAddSegments - tx.Exec: %w", err)
-		}
-
-		_, err = tx.Exec(ctx, queryInsertOperation, userID, slug, now, "add")
-		if err != nil {
-			return fmt.Errorf("UserRepo.autoAddSegments - tx.Exec: %w", err)
-		}
 	}
 
 	return nil

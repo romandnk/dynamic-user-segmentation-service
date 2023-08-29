@@ -5,9 +5,7 @@ import (
 	"errors"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/custom_error"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/storage"
-	"math/rand"
 	"strings"
-	"time"
 )
 
 var (
@@ -57,11 +55,7 @@ func (u *userService) UpdateUserSegments(ctx context.Context, segmentsToAdd, seg
 		}
 	}
 
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-
-	random := 1 + r.Intn(100)
-
-	return u.user.UpdateUserSegments(ctx, segmentsToAdd, segmentsToDelete, userID, uint8(random))
+	return u.user.UpdateUserSegments(ctx, segmentsToAdd, segmentsToDelete, userID)
 }
 
 func (u *userService) GetActiveSegments(ctx context.Context, userID int) ([]string, error) {
