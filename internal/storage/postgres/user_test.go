@@ -208,3 +208,80 @@ func TestStorage_GetActiveSegments(t *testing.T) {
 
 	require.NoError(t, mock.ExpectationsWereMet(), "there was unexpected result")
 }
+
+func TestStorage_AutoAddUserSegments(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	require.NoError(t, err)
+	defer mock.Close()
+
+	ctx := context.Background()
+
+	queryCount := fmt.Sprintf(`
+		SELECT COUNT(DISTINCT user_id)
+		FROM %s
+	`, userSegmentsTable)
+
+	querySelectSegments := fmt.Sprintf(`
+		SELECT slug, auto_add_percentage
+		FROM %s
+		WHERE auto_add_percentage > 0
+	`, segmentsTable)
+
+	querySelectUsers := fmt.Sprintf(`
+		SELECT COUNT(DISTINCT user_id)
+		FROM %s
+		WHERE segment_slug = $1
+	`, userSegmentsTable)
+
+	querySelectUsersWithoutCertainSegment := fmt.Sprintf(`
+		SELECT DISTINCT user_id
+		FROM %s
+		WHERE user_id NOT IN (
+    		SELECT DISTINCT user_id
+    		FROM %s
+    		WHERE segment_slug = $1
+		)
+		LIMIT $2
+	`, userSegmentsTable, userSegmentsTable)
+
+	queryInsertUserSegment := fmt.Sprintf(`
+		INSERT INTO %s (user_id, segment_slug)
+		VALUES ($1, $2)
+	`, userSegmentsTable)
+
+	queryInsertOperation := fmt.Sprintf(`
+		INSERT INTO %s (user_id, segment_slug, date, action, auto_add)
+		VALUES ($1, $2, $3, $4, $5)
+	`, operationsTable)
+
+	mock.ExpectBegin()
+	mock.ExpectQuery(regexp.QuoteMeta(queryCount)).
+		WillReturnRows(pgxmock.NewRows([]string{"count"}).AddRow(4))
+	mock.ExpectQuery(regexp.QuoteMeta(querySelectSegments)).
+		WillReturnRows(pgxmock.NewRows([]string{"slug", "auto_add_percentage"}).AddRow("TEST", 100))
+	mock.ExpectQuery(regexp.QuoteMeta(querySelectUsers)).
+		WithArgs("TEST").
+		WillReturnRows(pgxmock.NewRows([]string{"count"}).AddRow(1))
+	mock.ExpectQuery(regexp.QuoteMeta(querySelectUsersWithoutCertainSegment)).WithArgs("TEST", 3).
+		WillReturnRows(pgxmock.NewRows([]string{"user_id"}).
+			AddRow(1).
+			AddRow(2).
+			AddRow(3))
+	for i := 1; i <= 3; i++ {
+		mock.ExpectExec(regexp.QuoteMeta(queryInsertUserSegment)).
+			WithArgs(i, "TEST").
+			WillReturnResult(pgxmock.NewResult("insert", 1))
+		mock.ExpectExec(regexp.QuoteMeta(queryInsertOperation)).
+			WithArgs(i, "TEST", pgxmock.AnyArg(), "add", true).
+			WillReturnResult(pgxmock.NewResult("insert", 1))
+	}
+	mock.ExpectCommit()
+
+	storage := NewStoragePostgres()
+	storage.db = mock
+
+	err = storage.AutoAddUserSegments(ctx)
+	require.NoError(t, err)
+
+	require.NoError(t, mock.ExpectationsWereMet(), "there was unexpected result")
+}
