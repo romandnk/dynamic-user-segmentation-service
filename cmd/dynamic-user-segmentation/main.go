@@ -78,6 +78,23 @@ func main() {
 
 	logg.Info("starting dynamic user segmentation service...")
 
+	ticker := time.NewTicker(config.Ticker)
+	defer ticker.Stop()
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				err := services.User.AutoAddSegments(ctx)
+				if err != nil {
+					logg.Error("auto add segments", zap.String("error", err.Error()))
+				}
+			}
+		}
+	}()
+
 	// starting http server
 	if err := server.Start(); err != nil {
 		logg.Error("error dynamic user segmentation service", zap.String("error", err.Error()))

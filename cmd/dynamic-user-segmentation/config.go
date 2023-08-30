@@ -35,12 +35,14 @@ var (
 	ErrServerInvalidPort              = errors.New("invalid port (from 0 to 65535 inclusively)")
 	ErrServerInvalidReadTimeout       = errors.New("invalid read timeout (must be only positive)")
 	ErrServerInvalidWriteTimeout      = errors.New("invalid write timeout (must be only positive)")
+	ErrParseTicker                    = errors.New("invalid auto add ticker (format 1h2m3s)")
 )
 
 type Config struct {
 	ZapLogger zap_logger.Config
 	Postgres  postgres.Config
 	Server    http_server.Config
+	Ticker    time.Duration
 }
 
 func NewConfig(configPath string) (*Config, error) {
@@ -69,10 +71,17 @@ func NewConfig(configPath string) (*Config, error) {
 		return nil, fmt.Errorf("server: %w", err)
 	}
 
+	tickerStr := viper.GetString("auto_add_ticker")
+	ticker, err := time.ParseDuration(tickerStr)
+	if err != nil {
+		return nil, fmt.Errorf("auto add ticker: %w", ErrParseTicker)
+	}
+
 	config := &Config{
 		ZapLogger: zapLoggerConfig,
 		Postgres:  postgresConfig,
 		Server:    serverConfig,
+		Ticker:    ticker,
 	}
 
 	return config, nil

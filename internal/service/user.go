@@ -68,3 +68,7 @@ func (u *userService) GetActiveSegments(ctx context.Context, userID int) ([]stri
 
 	return u.user.GetActiveSegments(ctx, userID)
 }
+
+func (u *userService) AutoAddSegments(ctx context.Context) error {
+	return u.user.AutoAddUserSegments(ctx)
+}

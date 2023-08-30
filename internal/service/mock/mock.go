@@ -85,6 +85,20 @@ func (m *MockUser) EXPECT() *MockUserMockRecorder {
 	return m.recorder
 }
 
+// AutoAddSegments mocks base method.
+func (m *MockUser) AutoAddSegments(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AutoAddSegments", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AutoAddSegments indicates an expected call of AutoAddSegments.
+func (mr *MockUserMockRecorder) AutoAddSegments(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AutoAddSegments", reflect.TypeOf((*MockUser)(nil).AutoAddSegments), ctx)
+}
+
 // GetActiveSegments mocks base method.
 func (m *MockUser) GetActiveSegments(ctx context.Context, userID int) ([]string, error) {
 	m.ctrl.T.Helper()
@@ -135,6 +149,20 @@ func NewMockServices(ctrl *gomock.Controller) *MockServices {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockServices) EXPECT() *MockServicesMockRecorder {
 	return m.recorder
+}
+
+// AutoAddSegments mocks base method.
+func (m *MockServices) AutoAddSegments(ctx context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AutoAddSegments", ctx)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AutoAddSegments indicates an expected call of AutoAddSegments.
+func (mr *MockServicesMockRecorder) AutoAddSegments(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AutoAddSegments", reflect.TypeOf((*MockServices)(nil).AutoAddSegments), ctx)
 }
 
 // CreateSegment mocks base method.
