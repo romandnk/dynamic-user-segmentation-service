@@ -37,7 +37,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 			users := version.Group("/users")
 			{
-				users.POST("/", h.AddAndDeleteUserSegments)
+				users.POST("/", h.UpdateUserSegments)
 				users.POST("/active_segments", h.GetActiveUserSegments)
 			}
 		}

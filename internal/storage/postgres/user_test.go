@@ -177,3 +177,34 @@ func TestCheckUserSegment(t *testing.T) {
 
 	require.NoError(t, mock.ExpectationsWereMet(), "there was unexpected result")
 }
+
+func TestStorage_GetActiveSegments(t *testing.T) {
+	mock, err := pgxmock.NewPool()
+	require.NoError(t, err)
+	defer mock.Close()
+
+	ctx := context.Background()
+
+	expectedUserID := 1
+	expectedUserSegments := []string{"TEST1", "TEST2"}
+
+	query := fmt.Sprintf(`
+		SELECT segment_slug
+		FROM %s
+		WHERE user_id = $1
+	`, userSegmentsTable)
+
+	mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(expectedUserID).
+		WillReturnRows(pgxmock.NewRows([]string{"segment_slug"}).
+			AddRow(expectedUserSegments[0]).
+			AddRow(expectedUserSegments[1]))
+
+	storage := NewStoragePostgres()
+	storage.db = mock
+
+	userSegments, err := storage.GetActiveSegments(ctx, expectedUserID)
+	require.NoError(t, err)
+	require.ElementsMatch(t, expectedUserSegments, userSegments)
+
+	require.NoError(t, mock.ExpectationsWereMet(), "there was unexpected result")
+}

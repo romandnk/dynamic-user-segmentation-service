@@ -17,7 +17,7 @@ import (
 	"testing"
 )
 
-func TestHandler_AddAndDeleteUserSegments(t *testing.T) {
+func TestHandler_UpdateUserSegments(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	services := mock_service.NewMockServices(ctrl)
@@ -32,7 +32,7 @@ func TestHandler_AddAndDeleteUserSegments(t *testing.T) {
 	handler := NewHandler(services, nil)
 
 	r := gin.Default()
-	r.POST(url+"/users", handler.AddAndDeleteUserSegments)
+	r.POST(url+"/users", handler.UpdateUserSegments)
 
 	requestBody := map[string]interface{}{
 		"segments_to_add":    expectedSegmentsToAdd,
@@ -57,7 +57,7 @@ func TestHandler_AddAndDeleteUserSegments(t *testing.T) {
 	require.Equal(t, []byte(nil), w.Body.Bytes())
 }
 
-func TestHandler_AddAndDeleteUserSegmentsErrorParsingJSONBody(t *testing.T) {
+func TestHandler_UpdateUserSegmentsErrorParsingJSONBody(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	logger := mock_logger.NewMockLogger(ctrl)
@@ -70,7 +70,7 @@ func TestHandler_AddAndDeleteUserSegmentsErrorParsingJSONBody(t *testing.T) {
 	handler := NewHandler(nil, logger)
 
 	r := gin.Default()
-	r.POST(url+"/users", handler.AddAndDeleteUserSegments)
+	r.POST(url+"/users", handler.UpdateUserSegments)
 
 	requestBody := map[string]interface{}{
 		"segments_to_add":    true,
@@ -105,7 +105,7 @@ func TestHandler_AddAndDeleteUserSegmentsErrorParsingJSONBody(t *testing.T) {
 	require.True(t, ok)
 }
 
-func TestHandler_AddAndDeleteUserSegmentsError(t *testing.T) {
+func TestHandler_UpdateUserSegmentsError(t *testing.T) {
 	expectedMessage := "error updating user segments"
 
 	testCases := []struct {
@@ -183,7 +183,7 @@ func TestHandler_AddAndDeleteUserSegmentsError(t *testing.T) {
 			handler := NewHandler(services, logger)
 
 			r := gin.Default()
-			r.POST(url+"/users", handler.AddAndDeleteUserSegments)
+			r.POST(url+"/users", handler.UpdateUserSegments)
 
 			requestBody := map[string]interface{}{
 				"segments_to_add":    tc.inputSegmentsToAdd,
@@ -223,4 +223,88 @@ func TestHandler_AddAndDeleteUserSegmentsError(t *testing.T) {
 			require.True(t, ok)
 		})
 	}
+}
+
+func TestHandler_GetActiveUserSegments(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	services := mock_service.NewMockServices(ctrl)
+
+	expectedUserID := 1
+	expectedUserSegments := []string{"TEST1", "TEST2"}
+
+	services.EXPECT().GetActiveSegments(gomock.Any(), expectedUserID).Return(expectedUserSegments, nil)
+
+	handler := NewHandler(services, nil)
+
+	r := gin.Default()
+	r.POST(url+"/users/active_segments", handler.GetActiveUserSegments)
+
+	requestBody := map[string]interface{}{
+		"user_id": expectedUserID,
+	}
+
+	jsonBody, err := json.Marshal(requestBody)
+	require.NoError(t, err)
+
+	w := httptest.NewRecorder()
+
+	ctx := context.Background()
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url+"/users/active_segments", bytes.NewBuffer(jsonBody))
+	require.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+
+	r.ServeHTTP(w, req)
+
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var responseBody map[string]interface{}
+	err = json.Unmarshal(w.Body.Bytes(), &responseBody)
+	require.NoError(t, err)
+
+	segments, ok := responseBody["segments"]
+	require.True(t, ok)
+	require.ElementsMatch(t, segments, expectedUserSegments)
+}
+
+func TestHandler_GetActiveUserSegmentsEmptySegments(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	services := mock_service.NewMockServices(ctrl)
+
+	expectedUserID := 1
+	expectedUserSegments := []string{}
+
+	services.EXPECT().GetActiveSegments(gomock.Any(), expectedUserID).Return(expectedUserSegments, nil)
+
+	handler := NewHandler(services, nil)
+
+	r := gin.Default()
+	r.POST(url+"/users/active_segments", handler.GetActiveUserSegments)
+
+	requestBody := map[string]interface{}{
+		"user_id": expectedUserID,
+	}
+
+	jsonBody, err := json.Marshal(requestBody)
+	require.NoError(t, err)
+
+	w := httptest.NewRecorder()
+
+	ctx := context.Background()
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url+"/users/active_segments", bytes.NewBuffer(jsonBody))
+	require.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+
+	r.ServeHTTP(w, req)
+
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var responseBody map[string]interface{}
+	err = json.Unmarshal(w.Body.Bytes(), &responseBody)
+	require.NoError(t, err)
+
+	segments, ok := responseBody["segments"]
+	require.True(t, ok)
+	require.Equal(t, "no segments", segments)
 }

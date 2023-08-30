@@ -13,7 +13,7 @@ type addAndDeleteUserSegmentsBodyRequest struct {
 	UserID           int      `json:"user_id"`
 }
 
-func (h *Handler) AddAndDeleteUserSegments(c *gin.Context) {
+func (h *Handler) UpdateUserSegments(c *gin.Context) {
 	var addAndDeleteUserSegmentsBody addAndDeleteUserSegmentsBodyRequest
 
 	if err := c.ShouldBindJSON(&addAndDeleteUserSegmentsBody); err != nil {
