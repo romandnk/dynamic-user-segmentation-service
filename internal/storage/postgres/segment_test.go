@@ -63,12 +63,11 @@ func TestStorage_CreateSegmentExists(t *testing.T) {
 	`, segmentsTable)
 
 	returnError := &pgconn.PgError{
-		Code:           "23505",
-		Message:        "duplicate key value violates unique constraint \"segments_slug_key\"",
-		ConstraintName: "segments_slug_key",
+		Code: "23505",
 	}
 
-	mock.ExpectExec(regexp.QuoteMeta(query)).WithArgs(expectedSegment.Slug, expectedSegment.Percentage).WillReturnError(returnError)
+	mock.ExpectExec(regexp.QuoteMeta(query)).WithArgs(expectedSegment.Slug, expectedSegment.Percentage).
+		WillReturnError(returnError)
 
 	storage := NewStoragePostgres()
 	storage.db = mock
