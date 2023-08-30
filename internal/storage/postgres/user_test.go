@@ -35,7 +35,7 @@ func TestStorage_UpdateUserSegments(t *testing.T) {
 	`, userSegmentsTable)
 
 	queryInsertForAddOperation := fmt.Sprintf(`
-		INSERT INTO %s (user_id, segment_slug, date, operation, auto_add)
+		INSERT INTO %s (user_id, segment_slug, date, action, auto_add)
 		VALUES ($1, $2, $3, $4, $5)
 	`, operationsTable)
 
@@ -45,7 +45,7 @@ func TestStorage_UpdateUserSegments(t *testing.T) {
 	`, userSegmentsTable)
 
 	queryInsertForDeleteOperation := fmt.Sprintf(`
-		INSERT INTO %s (user_id, segment_slug, date, operation, auto_add)
+		INSERT INTO %s (user_id, segment_slug, date, action, auto_add)
 		VALUES ($1, $2, $3, $4, false)
 	`, operationsTable)
 

@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/models"
+	"time"
 )
 
 type SegmentStorage interface {
@@ -16,7 +17,12 @@ type UserStorage interface {
 	AutoAddUserSegments(ctx context.Context) error
 }
 
+type OperationStorage interface {
+	GetOperations(ctx context.Context, date time.Time) ([]models.Operation, error)
+}
+
 type Storage interface {
 	SegmentStorage
 	UserStorage
+	OperationStorage
 }

@@ -95,7 +95,7 @@ func addUserSegment(ctx context.Context, tx pgx.Tx, segment string, userID int, 
 	}
 
 	queryInsertOperation := fmt.Sprintf(`
-		INSERT INTO %s (user_id, segment_slug, date, operation, auto_add)
+		INSERT INTO %s (user_id, segment_slug, date, action, auto_add)
 		VALUES ($1, $2, $3, $4, $5)
 	`, operationsTable)
 
@@ -126,7 +126,7 @@ func deleteUserSegment(ctx context.Context, tx pgx.Tx, segment string, userID in
 	}
 
 	queryInsertOperation := fmt.Sprintf(`
-		INSERT INTO %s (user_id, segment_slug, date, operation, auto_add)
+		INSERT INTO %s (user_id, segment_slug, date, action, auto_add)
 		VALUES ($1, $2, $3, $4, false)
 	`, operationsTable)
 

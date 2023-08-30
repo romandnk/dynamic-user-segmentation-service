@@ -46,6 +46,8 @@ services:
       - '8080:8080'
     networks:
       dynamic-user-segmentation:
+    volumes:
+      - ../static/reports:/app/static/reports
 
 networks:
   dynamic-user-segmentation:

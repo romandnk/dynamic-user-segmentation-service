@@ -39,6 +39,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			{
 				users.POST("/", h.UpdateUserSegments)
 				users.POST("/active_segments", h.GetActiveUserSegments)
+				users.POST("/report", h.CreateCSVReportAndURL)
 			}
 		}
 	}

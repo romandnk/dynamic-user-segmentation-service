@@ -39,10 +39,11 @@ var (
 )
 
 type Config struct {
-	ZapLogger zap_logger.Config
-	Postgres  postgres.Config
-	Server    http_server.Config
-	Ticker    time.Duration
+	ZapLogger     zap_logger.Config
+	Postgres      postgres.Config
+	Server        http_server.Config
+	Ticker        time.Duration
+	PathToReports string
 }
 
 func NewConfig(configPath string) (*Config, error) {
@@ -77,11 +78,14 @@ func NewConfig(configPath string) (*Config, error) {
 		return nil, fmt.Errorf("auto add ticker: %w", ErrParseTicker)
 	}
 
+	pathToReports := viper.GetString("path_to_reports")
+
 	config := &Config{
-		ZapLogger: zapLoggerConfig,
-		Postgres:  postgresConfig,
-		Server:    serverConfig,
-		Ticker:    ticker,
+		ZapLogger:     zapLoggerConfig,
+		Postgres:      postgresConfig,
+		Server:        serverConfig,
+		Ticker:        ticker,
+		PathToReports: pathToReports,
 	}
 
 	return config, nil

@@ -15,7 +15,7 @@ CREATE TABLE operations (
     user_id INTEGER NOT NULL,
     segment_slug VARCHAR(255) NOT NULL,
     date TIMESTAMPTZ NOT NULL,
-    operation VARCHAR(6) NOT NULL,
+    action VARCHAR(6) NOT NULL,
     auto_add BOOLEAN NOT NULL
 );
 

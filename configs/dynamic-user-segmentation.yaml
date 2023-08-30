@@ -20,4 +20,5 @@ server:
   read_timeout: "10s"
   write_timeout: "10s"
 
-auto_add_ticker: "2s"
+auto_add_ticker: "20s"
+path_to_reports: "static/reports/"

@@ -18,19 +18,27 @@ type User interface {
 	AutoAddSegments(ctx context.Context) error
 }
 
+type Operations interface {
+	CreateCSVReportAndURL(ctx context.Context, date string) (string, error)
+	//GetOperationsByID(ctx context.Context, id string) ([]models.Operation, error)
+}
+
 type Services interface {
 	Segment
 	User
+	Operations
 }
 
 type Service struct {
 	Segment
 	User
+	Operations
 }
 
-func NewService(storage storage.Storage) *Service {
+func NewService(storage storage.Storage, pathToReports string) *Service {
 	return &Service{
 		newSegmentService(storage),
 		newUserService(storage),
+		newOperationService(storage, pathToReports),
 	}
 }

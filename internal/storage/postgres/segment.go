@@ -84,7 +84,7 @@ func (s *Storage) DeleteSegment(ctx context.Context, slug string) error {
 	}
 
 	queryAddOperations := fmt.Sprintf(`
-		INSERT INTO %s (user_id, segment_slug, date, operation, auto_add) 
+		INSERT INTO %s (user_id, segment_slug, date, action, auto_add) 
 		VALUES ($1, $2, $3, $4, $5)
 	`, operationsTable)
 

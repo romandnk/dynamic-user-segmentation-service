@@ -14,5 +14,6 @@ WORKDIR /app
 COPY --from=build /app/bin/dynamic-user-segmentation ./bin/
 
 COPY ./configs/dynamic-user-segmentation.yaml ./configs/
+COPY ./static/reports ./static/reports
 
 CMD ["./bin/dynamic-user-segmentation", "-config", "./configs/dynamic-user-segmentation.yaml"]

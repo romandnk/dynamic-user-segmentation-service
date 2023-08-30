@@ -51,7 +51,7 @@ func main() {
 	logg.Info("using postgres storage")
 
 	// initialize services
-	services := service.NewService(postgresStorage)
+	services := service.NewService(postgresStorage, config.PathToReports)
 
 	// initialize http handler
 	handler := v1.NewHandler(services, logg)
