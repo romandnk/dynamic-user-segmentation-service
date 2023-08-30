@@ -308,3 +308,104 @@ func TestHandler_GetActiveUserSegmentsEmptySegments(t *testing.T) {
 	require.True(t, ok)
 	require.Equal(t, "no segments", segments)
 }
+
+func TestHandler_GetActiveUserSegmentsErrorParsingJSONBody(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	expectedUserID := "text"
+
+	logger := mock_logger.NewMockLogger(ctrl)
+
+	expectedMessage := "error parsing json body"
+	expectedError := "json: cannot unmarshal string into Go struct field getActiveUserSegmentsBodyRequest.user_id of type int"
+
+	logger.EXPECT().Error(ErrParsingBody.Error(), zap.String("errors", expectedError))
+
+	handler := NewHandler(nil, logger)
+
+	r := gin.Default()
+	r.POST(url+"/users/active_segments", handler.GetActiveUserSegments)
+
+	requestBody := map[string]interface{}{
+		"user_id": expectedUserID,
+	}
+
+	jsonBody, err := json.Marshal(requestBody)
+	require.NoError(t, err)
+
+	w := httptest.NewRecorder()
+
+	ctx := context.Background()
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url+"/users/active_segments", bytes.NewBuffer(jsonBody))
+	require.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+
+	r.ServeHTTP(w, req)
+
+	require.Equal(t, http.StatusBadRequest, w.Code)
+
+	var responseBody map[string]interface{}
+	err = json.Unmarshal(w.Body.Bytes(), &responseBody)
+	require.NoError(t, err)
+
+	actualMessage, ok := responseBody["message"]
+	require.Equal(t, expectedMessage, actualMessage)
+	require.True(t, ok)
+
+	actualError, ok := responseBody["error"]
+	require.Equal(t, expectedError, actualError)
+	require.True(t, ok)
+}
+
+func TestHandler_GetActiveUserSegmentsErrorInvalidUserID(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	services := mock_service.NewMockServices(ctrl)
+	logger := mock_logger.NewMockLogger(ctrl)
+
+	expectedUserID := 0
+	expectedUserSegments := []string{}
+	expectedError := custom_error.CustomError{
+		Field:   "user_id",
+		Message: service.ErrInvalidUserID.Error(),
+	}
+	expectedMessage := "error getting user segments"
+
+	services.EXPECT().GetActiveSegments(gomock.Any(), expectedUserID).Return(expectedUserSegments, expectedError)
+	logger.EXPECT().Error(expectedMessage, zap.String("errors", expectedError.Error()))
+
+	handler := NewHandler(services, logger)
+
+	r := gin.Default()
+	r.POST(url+"/users/active_segments", handler.GetActiveUserSegments)
+
+	requestBody := map[string]interface{}{
+		"user_id": expectedUserID,
+	}
+
+	jsonBody, err := json.Marshal(requestBody)
+	require.NoError(t, err)
+
+	w := httptest.NewRecorder()
+
+	ctx := context.Background()
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url+"/users/active_segments", bytes.NewBuffer(jsonBody))
+	require.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+
+	r.ServeHTTP(w, req)
+
+	require.Equal(t, http.StatusBadRequest, w.Code)
+
+	var responseBody map[string]interface{}
+	err = json.Unmarshal(w.Body.Bytes(), &responseBody)
+	require.NoError(t, err)
+
+	actualMessage, ok := responseBody["message"]
+	require.Equal(t, expectedMessage, actualMessage)
+	require.True(t, ok)
+
+	actualError, ok := responseBody["error"]
+	require.Equal(t, expectedError.Error(), actualError)
+	require.True(t, ok)
+}
