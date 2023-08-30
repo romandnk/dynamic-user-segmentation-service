@@ -128,6 +128,44 @@ func (mr *MockUserMockRecorder) UpdateUserSegments(ctx, segmentsToAdd, segmentsT
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserSegments", reflect.TypeOf((*MockUser)(nil).UpdateUserSegments), ctx, segmentsToAdd, segmentsToDelete, userID)
 }
 
+// MockOperations is a mock of Operations interface.
+type MockOperations struct {
+	ctrl     *gomock.Controller
+	recorder *MockOperationsMockRecorder
+}
+
+// MockOperationsMockRecorder is the mock recorder for MockOperations.
+type MockOperationsMockRecorder struct {
+	mock *MockOperations
+}
+
+// NewMockOperations creates a new mock instance.
+func NewMockOperations(ctrl *gomock.Controller) *MockOperations {
+	mock := &MockOperations{ctrl: ctrl}
+	mock.recorder = &MockOperationsMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockOperations) EXPECT() *MockOperationsMockRecorder {
+	return m.recorder
+}
+
+// CreateCSVReportAndURL mocks base method.
+func (m *MockOperations) CreateCSVReportAndURL(ctx context.Context, date string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateCSVReportAndURL", ctx, date)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateCSVReportAndURL indicates an expected call of CreateCSVReportAndURL.
+func (mr *MockOperationsMockRecorder) CreateCSVReportAndURL(ctx, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCSVReportAndURL", reflect.TypeOf((*MockOperations)(nil).CreateCSVReportAndURL), ctx, date)
+}
+
 // MockServices is a mock of Services interface.
 type MockServices struct {
 	ctrl     *gomock.Controller
@@ -163,6 +201,21 @@ func (m *MockServices) AutoAddSegments(ctx context.Context) error {
 func (mr *MockServicesMockRecorder) AutoAddSegments(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AutoAddSegments", reflect.TypeOf((*MockServices)(nil).AutoAddSegments), ctx)
+}
+
+// CreateCSVReportAndURL mocks base method.
+func (m *MockServices) CreateCSVReportAndURL(ctx context.Context, date string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateCSVReportAndURL", ctx, date)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateCSVReportAndURL indicates an expected call of CreateCSVReportAndURL.
+func (mr *MockServicesMockRecorder) CreateCSVReportAndURL(ctx, date interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCSVReportAndURL", reflect.TypeOf((*MockServices)(nil).CreateCSVReportAndURL), ctx, date)
 }
 
 // CreateSegment mocks base method.
