@@ -36,7 +36,7 @@ services:
       context: ../.
       dockerfile: ./deployments/dynamic-user-segmentation/Dockerfile
     env_file:
-      - ../configs/dynamic-user-segmentation.env
+      - ../configs/dynamic-user-segmentation.example.env
     depends_on:
       postgres:
         condition: service_healthy

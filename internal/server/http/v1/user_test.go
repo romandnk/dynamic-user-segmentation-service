@@ -29,7 +29,7 @@ func TestHandler_UpdateUserSegments(t *testing.T) {
 	services.EXPECT().UpdateUserSegments(gomock.Any(), expectedSegmentsToAdd, expectedSegmentsToDelete, expectedUserID).
 		Return(nil)
 
-	handler := NewHandler(services, nil)
+	handler := NewHandler(services, nil, "")
 
 	r := gin.Default()
 	r.POST(url+"/users", handler.UpdateUserSegments)
@@ -67,7 +67,7 @@ func TestHandler_UpdateUserSegmentsErrorParsingJSONBody(t *testing.T) {
 
 	logger.EXPECT().Error(ErrParsingBody.Error(), zap.String("errors", expectedError))
 
-	handler := NewHandler(nil, logger)
+	handler := NewHandler(nil, logger, "")
 
 	r := gin.Default()
 	r.POST(url+"/users", handler.UpdateUserSegments)
@@ -180,7 +180,7 @@ func TestHandler_UpdateUserSegmentsError(t *testing.T) {
 				UpdateUserSegments(gomock.Any(), tc.inputSegmentsToAdd, tc.inputSegmentsToDelete, tc.inputUserID).
 				Return(tc.expectedError)
 
-			handler := NewHandler(services, logger)
+			handler := NewHandler(services, logger, "")
 
 			r := gin.Default()
 			r.POST(url+"/users", handler.UpdateUserSegments)
@@ -235,7 +235,7 @@ func TestHandler_GetActiveUserSegments(t *testing.T) {
 
 	services.EXPECT().GetActiveSegments(gomock.Any(), expectedUserID).Return(expectedUserSegments, nil)
 
-	handler := NewHandler(services, nil)
+	handler := NewHandler(services, nil, "")
 
 	r := gin.Default()
 	r.POST(url+"/users/active_segments", handler.GetActiveUserSegments)
@@ -277,7 +277,7 @@ func TestHandler_GetActiveUserSegmentsEmptySegments(t *testing.T) {
 
 	services.EXPECT().GetActiveSegments(gomock.Any(), expectedUserID).Return(expectedUserSegments, nil)
 
-	handler := NewHandler(services, nil)
+	handler := NewHandler(services, nil, "")
 
 	r := gin.Default()
 	r.POST(url+"/users/active_segments", handler.GetActiveUserSegments)
@@ -321,7 +321,7 @@ func TestHandler_GetActiveUserSegmentsErrorParsingJSONBody(t *testing.T) {
 
 	logger.EXPECT().Error(ErrParsingBody.Error(), zap.String("errors", expectedError))
 
-	handler := NewHandler(nil, logger)
+	handler := NewHandler(nil, logger, "")
 
 	r := gin.Default()
 	r.POST(url+"/users/active_segments", handler.GetActiveUserSegments)
@@ -374,7 +374,7 @@ func TestHandler_GetActiveUserSegmentsErrorInvalidUserID(t *testing.T) {
 	services.EXPECT().GetActiveSegments(gomock.Any(), expectedUserID).Return(expectedUserSegments, expectedError)
 	logger.EXPECT().Error(expectedMessage, zap.String("errors", expectedError.Error()))
 
-	handler := NewHandler(services, logger)
+	handler := NewHandler(services, logger, "")
 
 	r := gin.Default()
 	r.POST(url+"/users/active_segments", handler.GetActiveUserSegments)

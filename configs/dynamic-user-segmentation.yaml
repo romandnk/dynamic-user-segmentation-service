@@ -1,24 +1,24 @@
 zap_logger:
-  level: "info"
-  encoding: "json"
-  output_path: ["stdout"]
-  error_output_path: ["stdout"]
+  level:
+  encoding:
+  output_path:
+  error_output_path:
 
 postgres_storage:
-  host: "postgres"
-  port: 5432
-  db_name: "dynamic-user-segmentation_db"
-  sslmode: "disable"
-  max_conns: 5
-  min_conns: 3
-  max_conn_lifetime: "1h"
-  max_conn_idle_time: "1m"
+  host:
+  port:
+  db_name:
+  sslmode:
+  max_conns:
+  min_conns:
+  max_conn_lifetime:
+  max_conn_idle_time:
 
 server:
-  host: "service"
-  port: 8080
-  read_timeout: "10s"
-  write_timeout: "10s"
+  host:
+  port:
+  read_timeout:
+  write_timeout:
 
-auto_add_ticker: "20s"
-path_to_reports: "static/reports/"
+auto_add_ticker:
+path_to_reports:

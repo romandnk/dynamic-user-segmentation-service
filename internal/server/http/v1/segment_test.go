@@ -29,7 +29,7 @@ func TestHandler_CreateSegment(t *testing.T) {
 
 	services.EXPECT().CreateSegment(gomock.Any(), expectedSlug, expectedAutoAddPercentage).Return(nil)
 
-	handler := NewHandler(services, nil)
+	handler := NewHandler(services, nil, "")
 
 	r := gin.Default()
 	r.POST(url+"/segments", handler.CreateSegment)
@@ -66,7 +66,7 @@ func TestHandler_CreateSegmentErrorParsingJSONBody(t *testing.T) {
 
 	logger.EXPECT().Error(ErrParsingBody.Error(), zap.String("errors", expectedError))
 
-	handler := NewHandler(nil, logger)
+	handler := NewHandler(nil, logger, "")
 
 	r := gin.Default()
 	r.POST(url+"/segments", handler.CreateSegment)
@@ -148,7 +148,7 @@ func TestHandler_CreateSegmentError(t *testing.T) {
 			logger.EXPECT().Error(expectedMessage, zap.String("errors", tc.expectedError.Error()))
 			services.EXPECT().CreateSegment(gomock.Any(), tc.inputSlug, tc.inputPercentage).Return(tc.expectedError)
 
-			handler := NewHandler(services, logger)
+			handler := NewHandler(services, logger, "")
 
 			r := gin.Default()
 			r.POST(url+"/segments", handler.CreateSegment)
@@ -201,7 +201,7 @@ func TestHandler_DeleteSegment(t *testing.T) {
 
 	services.EXPECT().DeleteSegment(gomock.Any(), expectedSlug).Return(nil)
 
-	handler := NewHandler(services, nil)
+	handler := NewHandler(services, nil, "")
 
 	r := gin.Default()
 	r.DELETE(url+"/segments", handler.DeleteSegment)
@@ -237,7 +237,7 @@ func TestHandler_DeleteSegmentErrorParsingJsonBody(t *testing.T) {
 
 	logger.EXPECT().Error(ErrParsingBody.Error(), zap.String("errors", expectedError))
 
-	handler := NewHandler(nil, logger)
+	handler := NewHandler(nil, logger, "")
 
 	r := gin.Default()
 	r.DELETE(url+"/segments", handler.DeleteSegment)
@@ -316,7 +316,7 @@ func TestHandler_DeleteSegmentError(t *testing.T) {
 			logger.EXPECT().Error(expectedMessage, zap.String("errors", tc.expectedError.Error()))
 			services.EXPECT().DeleteSegment(gomock.Any(), tc.inputSlug).Return(tc.expectedError)
 
-			handler := NewHandler(services, logger)
+			handler := NewHandler(services, logger, "")
 
 			r := gin.Default()
 			r.DELETE(url+"/segments", handler.DeleteSegment)

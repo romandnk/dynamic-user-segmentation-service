@@ -166,21 +166,6 @@ func (mr *MockOperationsMockRecorder) CreateCSVReportAndURL(ctx, date interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCSVReportAndURL", reflect.TypeOf((*MockOperations)(nil).CreateCSVReportAndURL), ctx, date)
 }
 
-// GetReportByID mocks base method.
-func (m *MockOperations) GetReportByID(ctx context.Context, id string) ([]byte, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetReportByID", ctx, id)
-	ret0, _ := ret[0].([]byte)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetReportByID indicates an expected call of GetReportByID.
-func (mr *MockOperationsMockRecorder) GetReportByID(ctx, id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReportByID", reflect.TypeOf((*MockOperations)(nil).GetReportByID), ctx, id)
-}
-
 // MockServices is a mock of Services interface.
 type MockServices struct {
 	ctrl     *gomock.Controller
@@ -274,21 +259,6 @@ func (m *MockServices) GetActiveSegments(ctx context.Context, userID int) ([]str
 func (mr *MockServicesMockRecorder) GetActiveSegments(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetActiveSegments", reflect.TypeOf((*MockServices)(nil).GetActiveSegments), ctx, userID)
-}
-
-// GetReportByID mocks base method.
-func (m *MockServices) GetReportByID(ctx context.Context, id string) ([]byte, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetReportByID", ctx, id)
-	ret0, _ := ret[0].([]byte)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetReportByID indicates an expected call of GetReportByID.
-func (mr *MockServicesMockRecorder) GetReportByID(ctx, id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReportByID", reflect.TypeOf((*MockServices)(nil).GetReportByID), ctx, id)
 }
 
 // UpdateUserSegments mocks base method.
