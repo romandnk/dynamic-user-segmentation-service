@@ -21,8 +21,8 @@ services:
     build:
       context: ../.
       dockerfile: ./deployments/migration/Dockerfile
-    environment:
-      DATABASE_URL: "postgres://postgres:1234@postgres:5432/dynamic-user-segmentation_db?sslmode=disable"
+    env_file:
+      - ../configs/postgres.env
     depends_on:
       postgres:
         condition: service_healthy
