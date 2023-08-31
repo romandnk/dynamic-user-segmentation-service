@@ -91,6 +91,13 @@ func (h *Handler) GetActiveUserSegments(c *gin.Context) {
 		return
 	}
 
+	if len(segments) == 0 {
+		c.JSON(http.StatusOK, getActiveUserSegmentsBodyResponse{
+			Segments: []string{},
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, getActiveUserSegmentsBodyResponse{
 		Segments: segments,
 	})

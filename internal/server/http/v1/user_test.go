@@ -258,7 +258,7 @@ func TestHandler_GetActiveUserSegments(t *testing.T) {
 
 	require.Equal(t, http.StatusOK, w.Code)
 
-	var responseBody map[string]interface{}
+	var responseBody map[string][]string
 	err = json.Unmarshal(w.Body.Bytes(), &responseBody)
 	require.NoError(t, err)
 
@@ -300,13 +300,13 @@ func TestHandler_GetActiveUserSegmentsEmptySegments(t *testing.T) {
 
 	require.Equal(t, http.StatusOK, w.Code)
 
-	var responseBody map[string]interface{}
+	var responseBody map[string][]string
 	err = json.Unmarshal(w.Body.Bytes(), &responseBody)
 	require.NoError(t, err)
 
 	segments, ok := responseBody["segments"]
 	require.True(t, ok)
-	require.Equal(t, []interface{}{}, segments)
+	require.Equal(t, []string{}, segments)
 }
 
 func TestHandler_GetActiveUserSegmentsErrorParsingJSONBody(t *testing.T) {
