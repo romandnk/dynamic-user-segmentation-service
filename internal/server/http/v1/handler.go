@@ -2,8 +2,11 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
+	_ "github.com/romandnk/dynamic-user-segmentation-service/docs"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/logger"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/service"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Handler struct {
@@ -26,6 +29,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	router.Use(h.loggerMiddleware())
 	gin.SetMode(gin.ReleaseMode)
 	h.engine = router
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	api := router.Group("/api")
 	{

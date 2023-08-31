@@ -8,6 +8,7 @@ import (
 	v1 "github.com/romandnk/dynamic-user-segmentation-service/internal/server/http/v1"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/service"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/storage/postgres"
+	"github.com/subosito/gotenv"
 	"go.uber.org/zap"
 	"log"
 	"os/signal"
@@ -17,7 +18,14 @@ import (
 
 var configFile string
 
+// @title Dynamic User Segmentation API
+// @version 1.0
+// @description Dynamic User Segmentation API for storing users and their segments
+
+// @BasePath /api/v1
 func main() {
+	gotenv.Load("configs/dynamic-user-segmentation.env")
+
 	flag.StringVar(&configFile, "config", "./configs/dynamic-user-segmentation.yaml", "Path to configuration file")
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)

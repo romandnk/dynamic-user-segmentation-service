@@ -3,6 +3,7 @@ package v1
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	_ "github.com/romandnk/dynamic-user-segmentation-service/docs"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/custom_error"
 	"net/http"
 )
@@ -13,6 +14,15 @@ type addAndDeleteUserSegmentsBodyRequest struct {
 	UserID           int      `json:"user_id"`
 }
 
+// UpdateUserSegments godoc
+// @Summary Add and delete user segments by his id
+// @Tags user
+// @Accept json
+// @Param input body addAndDeleteUserSegmentsBodyRequest true "user segments to add and delete and his user id"
+// @Success 200
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Router /users [post]
 func (h *Handler) UpdateUserSegments(c *gin.Context) {
 	var addAndDeleteUserSegmentsBody addAndDeleteUserSegmentsBodyRequest
 
@@ -46,6 +56,19 @@ type getActiveUserSegmentsBodyRequest struct {
 	UserID int `json:"user_id"`
 }
 
+type getActiveUserSegmentsBodyResponse struct {
+	Segments []string `json:"segments"`
+}
+
+// GetActiveUserSegments godoc
+// @Summary Get active user segments
+// @Tags user
+// @Accept json
+// @Param input body getActiveUserSegmentsBodyRequest true "user id to get his segments"
+// @Success 200 {object} getActiveUserSegmentsBodyResponse
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Router /users/active_segments [post]
 func (h *Handler) GetActiveUserSegments(c *gin.Context) {
 	var getActiveUserSegmentsBody getActiveUserSegmentsBodyRequest
 
@@ -68,14 +91,7 @@ func (h *Handler) GetActiveUserSegments(c *gin.Context) {
 		return
 	}
 
-	if len(segments) == 0 {
-		c.JSON(http.StatusOK, map[string]string{
-			"segments": "no segments",
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"segments": segments,
+	c.JSON(http.StatusOK, getActiveUserSegmentsBodyResponse{
+		Segments: segments,
 	})
 }

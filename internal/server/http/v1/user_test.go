@@ -306,7 +306,7 @@ func TestHandler_GetActiveUserSegmentsEmptySegments(t *testing.T) {
 
 	segments, ok := responseBody["segments"]
 	require.True(t, ok)
-	require.Equal(t, "no segments", segments)
+	require.Equal(t, []interface{}{}, segments)
 }
 
 func TestHandler_GetActiveUserSegmentsErrorParsingJSONBody(t *testing.T) {

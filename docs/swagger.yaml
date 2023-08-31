@@ -1,0 +1,216 @@
+basePath: /api/v1
+definitions:
+  v1.addAndDeleteUserSegmentsBodyRequest:
+    properties:
+      segments_to_add:
+        items:
+          type: string
+        type: array
+      segments_to_delete:
+        items:
+          type: string
+        type: array
+      user_id:
+        type: integer
+    type: object
+  v1.createCSVRepostAndURLBodyRequest:
+    properties:
+      date:
+        type: string
+    type: object
+  v1.createCSVRepostAndURLBodyResponse:
+    properties:
+      report_url:
+        type: string
+    type: object
+  v1.createSegmentBodyRequest:
+    properties:
+      auto_add_percentage:
+        type: string
+      slug:
+        type: string
+    type: object
+  v1.deleteSegmentBodyRequest:
+    properties:
+      slug:
+        type: string
+    type: object
+  v1.getActiveUserSegmentsBodyRequest:
+    properties:
+      user_id:
+        type: integer
+    type: object
+  v1.getActiveUserSegmentsBodyResponse:
+    properties:
+      segments:
+        items:
+          type: string
+        type: array
+    type: object
+  v1.response:
+    properties:
+      error:
+        type: string
+      field:
+        type: string
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Dynamic User Segmentation API for storing users and their segments
+  title: Dynamic User Segmentation API
+  version: "1.0"
+paths:
+  /segments:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: slug-segment name to delete
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.deleteSegmentBodyRequest'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Delete segment
+      tags:
+      - segment
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: slug is a segment name, auto_add_percentage is a percentage of
+          users who will have this segment
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.createSegmentBodyRequest'
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Create segment
+      tags:
+      - segment
+  /users:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: user segments to add and delete and his user id
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.addAndDeleteUserSegmentsBodyRequest'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Add and delete user segments by his id
+      tags:
+      - user
+  /users/active_segments:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: user id to get his segments
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.getActiveUserSegmentsBodyRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.getActiveUserSegmentsBodyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Get active user segments
+      tags:
+      - user
+  /users/report:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: date format year-month
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/v1.createCSVRepostAndURLBodyRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.createCSVRepostAndURLBodyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Create a CSV file locally and return url to download a file
+      tags:
+      - operation
+  /users/report/{id}:
+    get:
+      parameters:
+      - description: report id
+        in: path
+        name: input
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/v1.response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/v1.response'
+      summary: Get report CSV file to download
+      tags:
+      - operation
+swagger: "2.0"

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	_ "github.com/romandnk/dynamic-user-segmentation-service/docs"
 	"github.com/romandnk/dynamic-user-segmentation-service/internal/custom_error"
 	"net/http"
 )
@@ -13,6 +14,19 @@ type createCSVRepostAndURLBodyRequest struct {
 	Date string `json:"date"`
 }
 
+type createCSVRepostAndURLBodyResponse struct {
+	URL string `json:"report_url"`
+}
+
+// CreateCSVReportAndURL godoc
+// @Summary Create a CSV file locally and return url to download a file
+// @Tags operation
+// @Accept json
+// @Param input body createCSVRepostAndURLBodyRequest true "date format year-month"
+// @Success 200 {object} createCSVRepostAndURLBodyResponse
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Router /users/report [post]
 func (h *Handler) CreateCSVReportAndURL(c *gin.Context) {
 	var createCSVRepostAndURLBody createCSVRepostAndURLBodyRequest
 
@@ -35,11 +49,19 @@ func (h *Handler) CreateCSVReportAndURL(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"report_url": url,
+	c.JSON(http.StatusOK, createCSVRepostAndURLBodyResponse{
+		URL: url,
 	})
 }
 
+// GetReportByID godoc
+// @Summary Get report CSV file to download
+// @Tags operation
+// @Param input path string true "report id"
+// @Success 200
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Router /users/report/{id} [get]
 func (h *Handler) GetReportByID(c *gin.Context) {
 	id := c.Param("id")
 	parsedID, err := uuid.Parse(id)

@@ -16,6 +16,15 @@ type createSegmentBodyRequest struct {
 	Percentage string `json:"auto_add_percentage"`
 }
 
+// CreateSegment godoc
+// @Summary Create segment
+// @Tags segment
+// @Accept json
+// @Param input body createSegmentBodyRequest true "slug is a segment name, auto_add_percentage is a percentage of users who will have this segment"
+// @Success 201
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Router /segments [post]
 func (h *Handler) CreateSegment(c *gin.Context) {
 	var segmentBody createSegmentBodyRequest
 
@@ -45,6 +54,15 @@ type deleteSegmentBodyRequest struct {
 	Slug string `json:"slug"`
 }
 
+// DeleteSegment godoc
+// @Summary Delete segment
+// @Tags segment
+// @Accept json
+// @Param input body deleteSegmentBodyRequest true "slug-segment name to delete"
+// @Success 200
+// @Failure 400 {object} response
+// @Failure 500 {object} response
+// @Router /segments [delete]
 func (h *Handler) DeleteSegment(c *gin.Context) {
 	var segmentBody deleteSegmentBodyRequest
 
