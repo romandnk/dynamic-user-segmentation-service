@@ -32,10 +32,6 @@ func newOperationService(operation storage.OperationStorage, pathToReports strin
 	}
 }
 
-//func (o *operationService) GetOperationsByID(ctx context.Context, id string) ([]models.Operation, error) {
-//	return o.operation.GetOperations(ctx, time.Time{})
-//}
-
 func (o *operationService) CreateCSVReportAndURL(ctx context.Context, date string) (string, error) {
 	layout := "2006-01"
 	parsedTime, err := time.Parse(layout, date)

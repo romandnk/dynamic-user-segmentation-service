@@ -54,7 +54,7 @@ func main() {
 	services := service.NewService(postgresStorage, config.PathToReports)
 
 	// initialize http handler
-	handler := v1.NewHandler(services, logg)
+	handler := v1.NewHandler(services, logg, config.PathToReports)
 
 	// initialize http server
 	server := http_server.NewServer(config.Server, handler.InitRoutes())

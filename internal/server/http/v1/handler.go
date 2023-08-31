@@ -7,15 +7,17 @@ import (
 )
 
 type Handler struct {
-	engine   *gin.Engine
-	services service.Services
-	logger   logger.Logger
+	engine        *gin.Engine
+	services      service.Services
+	logger        logger.Logger
+	pathToReports string
 }
 
-func NewHandler(services service.Services, logger logger.Logger) *Handler {
+func NewHandler(services service.Services, logger logger.Logger, pathToReports string) *Handler {
 	return &Handler{
-		services: services,
-		logger:   logger,
+		services:      services,
+		logger:        logger,
+		pathToReports: pathToReports,
 	}
 }
 
@@ -39,7 +41,12 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			{
 				users.POST("/", h.UpdateUserSegments)
 				users.POST("/active_segments", h.GetActiveUserSegments)
-				users.POST("/report", h.CreateCSVReportAndURL)
+
+				report := users.Group("/report")
+				{
+					report.POST("/", h.CreateCSVReportAndURL)
+					report.GET("/:id", h.GetReportByID)
+				}
 			}
 		}
 	}

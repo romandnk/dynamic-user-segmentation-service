@@ -20,7 +20,6 @@ type User interface {
 
 type Operations interface {
 	CreateCSVReportAndURL(ctx context.Context, date string) (string, error)
-	//GetOperationsByID(ctx context.Context, id string) ([]models.Operation, error)
 }
 
 type Services interface {
